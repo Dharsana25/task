@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Listing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+    }
+
+    body {
+      background-color: aliceblue;
+    }
+
+    header {
+      background-color: black;
+      color: gray;
+      padding: 1rem;
+      text-align: center;
+
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: bisque;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+    }
+
+    .modal-content img {
+      width: 100%;
+      border-radius: 5px;
+      margin-bottom: 1rem;
+    }
+
+    .filters {
+      display: flex;
+      padding: 1rem;
+      background-color: #fff;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .filters input,
+    .filters select {
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .product {
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      ;
+      padding: 1rem;
+      justify-items: center;
+
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Product Listing page</h1>
+  </header>
+  <div class="filters">
+    <input type="text" id="search" placeholder="Search by name">
+    <select id="categoryFilter">
+      <option value="all">All Categories</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Fashion">Fashion</option>
+      <option value="Books">Books</option>
+    </select>
+  </div>
+
+  <div class="product-grid" id="productGrid"></div>
+
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeModal">&times;</span>
+      <img id="modalImage" src="" alt="">
+      <h2 id="modalName"></h2>
+      <p id="modalPrice"></p>
+      <p id="modalDescription"></p>
+    </div>
+  </div>
+  <script>
+    const products = [
+      { id: 1, name: "Iphone", category: "Electronics", price: 499, description: "High-end Iphone", image: "mob.jpeg" },
+      { id: 2, name: "Laptop", category: "Electronics", price: 899, description: "Powerful laptop", image: "lap.jpeg" },
+      { id: 3, name: "Headphones", category: "Electronics", price: 199, description: "Noise cancelling headphones", image: "ear.jpeg" },
+
+      { id: 4, name: "T-Shirt", category: "Fashion", price: 29, description: "Comfortable cotton T-shirt", image: "t.jpeg" },
+      { id: 5, name: "Sneakers", category: "Fashion", price: 79, description: "Stylish sneakers", image: "s.jpeg" },
+      { id: 6, name: "Shirt", category: "Fashion", price: 90, description: "Stylish shirt", image: "sh.jpeg" },
+      { id: 7, name: "men watch", category: "Fashion", price: 39, description: "stylish men watch", image: "wa.jpeg" },
+      { id: 8, name: "women watch", category: "Fashion", price: 25, description: "stylish women watch", image: "wo.jpeg" },
+      { id: 9, name: "perfume", category: "Fashion", price: 25, description: "perfume", image: "pe.jpeg" },
+
+      { id: 10, name: "JavaScript Book", category: "Books", price: 39, description: "Learn JavaScript", image: "js.jpeg" },
+      { id: 11, name: "HTML Guide", category: "Books", price: 40, description: "Master HTML", image: "h.jpeg" },
+      { id: 12, name: "Java Book", category: "Books", price: 50, description: "Learn java", image: "ja.jpeg" },
+    ];
+    const productGrid = document.getElementById("productGrid");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const searchInput = document.getElementById("search");
+
+    const modal = document.getElementById("productModal");
+    const modalName = document.getElementById("modalName");
+    const modalPrice = document.getElementById("modalPrice");
+    const modalDescription = document.getElementById("modalDescription");
+    const modalImage = document.getElementById("modalImage");
+    const closeModal = document.getElementById("closeModal");
+
+    function renderProducts(filterCategory = "all", searchQuery = "") {
+      productGrid.innerHTML = "";
+      const filtered = products.filter(product => {
+        const matchCategory = filterCategory === "all" || product.category === filterCategory;
+        const matchSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchCategory && matchSearch;
+      });
+
+      filtered.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product";
+        card.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" />
+          <h3>${product.name}</h3>
+          <p>$${product.price}</p>
+        `;
+        card.addEventListener("click", () => openModal(product));
+        productGrid.appendChild(card);
+      });
+    }
+
+    function openModal(product) {
+      modalName.textContent = product.name;
+      modalPrice.textContent = `$${product.price}`;
+      modalDescription.textContent = product.description;
+      modalImage.src = product.image;
+      modal.style.display = "flex";
+    }
+    modal.addEventListener("click", (e) => {
+
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+      card.addEventListener("click", () => openmodel(product));
+      productGrid.appendChild(card);
+    });
+
+    categoryFilter.addEventListener("change", () => {
+      renderProducts(categoryFilter.value, searchInput.value);
+    });
+
+    searchInput.addEventListener("input", () => {
+      renderProducts(categoryFilter.value, searchInput.value);
+    });
+
+    renderProducts();
+  </script>
+</body>
+
+</html>
