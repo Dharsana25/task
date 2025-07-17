@@ -21,47 +21,59 @@
       color: gray;
       padding: 1rem;
       text-align: center;
-
     }
 
     .modal {
+      background-color: bisque;
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       display: none;
       justify-content: center;
+      align-items: center;
     }
 
-    .modal-content {
-      background: bisque;
-      padding: 2rem;
-      border-radius: 10px;
-      max-width: 500px;
-      width: 90%;
-      position: relative;
+    .modal-content input,
+    .modal-content textarea {
+      display: block;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      justify-items: center;
     }
 
     .modal-content img {
-      width: 100%;
       border-radius: 5px;
       margin-bottom: 1rem;
+    }
+
+    .btn-group button {
+      padding: 10px;
+      font-size: 16px;
+      background-color: #333;
+      color: white;
+      border-radius: 5px;
     }
 
     .filters {
       display: flex;
       padding: 1rem;
-      background-color: #fff;
+      background-color: white;
       justify-content: center;
       padding: 10px;
+
     }
 
     .filters input,
     .filters select {
       padding: 0.5rem;
       border-radius: 5px;
-      border: 1px solid #ccc;
+      border: 1px solid;
+      margin-left: 10px;
     }
 
     .product-grid {
@@ -69,15 +81,18 @@
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
       padding: 1rem;
+
     }
 
     .product {
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      ;
       padding: 1rem;
-      justify-items: center;
+      justify-items: left;
+    }
 
+    .product img {
+      width: 200px;
     }
   </style>
 </head>
@@ -87,33 +102,46 @@
     <h1>Product Listing page</h1>
   </header>
   <div class="filters">
-    <input type="text" id="search" placeholder="Search by name">
+    <input type="text" id="searchInput" placeholder="Search by name">
     <select id="categoryFilter">
       <option value="all">All Categories</option>
       <option value="Electronics">Electronics</option>
       <option value="Fashion">Fashion</option>
       <option value="Books">Books</option>
     </select>
+    <button style="margin-left: 10px;" onclick="openAddModal()">Add Product</button>
+    <button style="margin-left: 10px;" onclick="deleteSelected()">Delete Selected</button>
   </div>
-
   <div class="product-grid" id="productGrid"></div>
-
-  <div class="modal" id="productModal">
+  <div class="modal" id="formModal">
     <div class="modal-content">
-      <span class="close-btn" id="closeModal">&times;</span>
-      <img id="modalImage" src="" alt="">
-      <h2 id="modalName"></h2>
-      <p id="modalPrice"></p>
-      <p id="modalDescription"></p>
+      <h2 id="formTitle">Add Product</h2>
+      <input type="text" id="formName" placeholder="Name" />
+      <input type="text" id="formCategory" placeholder="Category" />
+      <input type="number" id="formPrice" placeholder="Price" />
+      <input type="text" id="formImage" placeholder="Image filename (e.g. mob.jpeg)" />
+      <textarea id="formDesc" placeholder="Description"></textarea>
+      <div class="btn-group">
+        <button onclick="saveProduct()">Save</button>
+        <button onclick="closeFormModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal" id="viewModal">
+    <div class="modal-content">
+      <img id="viewImage" style="width: 100%; border-radius: 10px;" />
+      <h2 id="viewName"></h2>
+      <p id="viewPrice"></p>
+      <p id="viewDescription"></p>
     </div>
   </div>
   <script>
-    const products = [
+    let products = [
       { id: 1, name: "Iphone", category: "Electronics", price: 499, description: "High-end Iphone", image: "mob.jpeg" },
       { id: 2, name: "Laptop", category: "Electronics", price: 899, description: "Powerful laptop", image: "lap.jpeg" },
       { id: 3, name: "Headphones", category: "Electronics", price: 199, description: "Noise cancelling headphones", image: "ear.jpeg" },
 
-      { id: 4, name: "T-Shirt", category: "Fashion", price: 29, description: "Comfortable cotton T-shirt", image: "t.jpeg" },
+      { id: 4, name: "T-Shirt", category: "Fashion", price: 29, description: "Comfortable cotton T-shirt", image: "th.jpeg" },
       { id: 5, name: "Sneakers", category: "Fashion", price: 79, description: "Stylish sneakers", image: "s.jpeg" },
       { id: 6, name: "Shirt", category: "Fashion", price: 90, description: "Stylish shirt", image: "sh.jpeg" },
       { id: 7, name: "men watch", category: "Fashion", price: 39, description: "stylish men watch", image: "wa.jpeg" },
@@ -124,60 +152,103 @@
       { id: 11, name: "HTML Guide", category: "Books", price: 40, description: "Master HTML", image: "h.jpeg" },
       { id: 12, name: "Java Book", category: "Books", price: 50, description: "Learn java", image: "ja.jpeg" },
     ];
+    let editingId = null;
+
     const productGrid = document.getElementById("productGrid");
     const categoryFilter = document.getElementById("categoryFilter");
-    const searchInput = document.getElementById("search");
+    const searchInput = document.getElementById("searchInput");
 
-    const modal = document.getElementById("productModal");
-    const modalName = document.getElementById("modalName");
-    const modalPrice = document.getElementById("modalPrice");
-    const modalDescription = document.getElementById("modalDescription");
-    const modalImage = document.getElementById("modalImage");
-    const closeModal = document.getElementById("closeModal");
-
-    function renderProducts(filterCategory = "all", searchQuery = "") {
+    function renderProducts() {
+      const filter = categoryFilter.value.toLowerCase();
+      const search = searchInput.value.toLowerCase();
       productGrid.innerHTML = "";
-      const filtered = products.filter(product => {
-        const matchCategory = filterCategory === "all" || product.category === filterCategory;
-        const matchSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchCategory && matchSearch;
-      });
 
-      filtered.forEach(product => {
-        const card = document.createElement("div");
-        card.className = "product";
-        card.innerHTML = `
-          <img src="${product.image}" alt="${product.name}" />
+      products.forEach(product => {
+        const matchCategory = filter === "all" || product.category.toLowerCase() === filter;
+        const matchSearch = product.name.toLowerCase().includes(search);
+        if (matchCategory && matchSearch) {
+          const card = document.createElement("div");
+          card.className = "product";
+          card.innerHTML = `
+          <div class="select-box">
+            <input type="checkbox" data-id="${product.id}">
+          </div>
+          <img src="${product.image.trim()}" alt="${product.name}" onclick='showProductDetails(${JSON.stringify(product)})'>
           <h3>${product.name}</h3>
           <p>$${product.price}</p>
+          <div class="actions">
+            <button onclick='editProduct(${JSON.stringify(product)})'>Edit</button>
+            <button onclick='deleteProduct(${product.id})'>Delete</button>
+          </div>
         `;
-        card.addEventListener("click", () => openModal(product));
-        productGrid.appendChild(card);
+          productGrid.appendChild(card);
+        }
       });
     }
 
-    function openModal(product) {
-      modalName.textContent = product.name;
-      modalPrice.textContent = `$${product.price}`;
-      modalDescription.textContent = product.description;
-      modalImage.src = product.image;
-      modal.style.display = "flex";
+    function showProductDetails(product) {
+      document.getElementById("viewImage").src = product.image.trim();
+      document.getElementById("viewName").textContent = product.name;
+      document.getElementById("viewPrice").textContent = "$" + product.price;
+      document.getElementById("viewDescription").textContent = product.description;
+      document.getElementById("viewModal").style.display = "flex";
     }
-    modal.addEventListener("click", (e) => {
 
-      if (e.target === modal) {
-        modal.style.display = "none";
+    document.getElementById("viewModal").addEventListener("click", function (e) {
+      if (e.target === this) this.style.display = "none";
+    });
+    function openAddModal() {
+      editingId = null;
+      document.getElementById("formTitle").textContent = "Add Product";
+      document.getElementById("formName").value = "";
+      document.getElementById("formCategory").value = "";
+      document.getElementById("formPrice").value = "";
+      document.getElementById("formImage").value = "";
+      document.getElementById("formDesc").value = "";
+      document.getElementById("formModal").style.display = "flex";
+    }
+    function editProduct(product) {
+      editingId = product.id;
+      document.getElementById("formTitle").textContent = "Edit Product";
+      document.getElementById("formName").value = product.name;
+      document.getElementById("formCategory").value = product.category;
+      document.getElementById("formPrice").value = product.price;
+      document.getElementById("formImage").value = product.image;
+      document.getElementById("formDesc").value = product.description;
+      document.getElementById("formModal").style.display = "flex";
+    }
+    function closeFormModal() {
+      document.getElementById("formModal").style.display = "none";
+    }
+    function saveProduct() {
+      const name = document.getElementById("formName").value;
+      const category = document.getElementById("formCategory").value;
+      const price = parseFloat(document.getElementById("formPrice").value);
+      const image = document.getElementById("formImage").value.trim();
+      const description = document.getElementById("formDesc").value;
+      if (!name || !category || !price || !image || !description) return alert("Please fill all fields");
+      if (editingId) {
+        const index = products.findIndex(p => p.id === editingId);
+        products[index] = { id: editingId, name, category, price, image, description };
+      } else {
+        const id = products.length ? products[products.length - 1].id + 1 : 1;
+        products.push({ id, name, category, price, image, description });
       }
-    });
-
-    categoryFilter.addEventListener("change", () => {
-      renderProducts(categoryFilter.value, searchInput.value);
-    });
-
-    searchInput.addEventListener("input", () => {
-      renderProducts(categoryFilter.value, searchInput.value);
-    });
-
+      closeFormModal();
+      renderProducts();
+    }
+    function deleteProduct(id) {
+      products = products.filter(p => p.id !== id);
+      renderProducts();
+    }
+    function deleteSelected() {
+      const checkboxes = document.querySelectorAll("input[type='checkbox']:checked");
+      const ids = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+      products = products.filter(p => !ids.includes(p.id));
+      renderProducts();
+    }
+    categoryFilter.addEventListener("change", renderProducts);
+    searchInput.addEventListener("input", renderProducts);
     renderProducts();
   </script>
 </body>
