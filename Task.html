@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Improved Product Listing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+
+        }
+
+        header {
+            text-align: center;
+            padding: 1em;
+            box-shadow: 2px 2px 5px;
+
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input,
+        select,
+        button {
+            margin: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+
+        }
+
+
+        .btn-delete {
+            background-color: #dc3545;
+        }
+
+
+        .btn-select {
+            background-color: #007bff;
+        }
+
+
+        .btn-search {
+            background-color: #17a2b8;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .product {
+            max-width: 250px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+
+        .product img {
+            width: 100%;
+            height: 150px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .actions button {
+            background-color: #007bff;
+            color: white;
+            margin: 5px;
+            border-radius: 10px;
+
+        }
+
+        .actions button.delete {
+            background-color: #dc3545;
+        }
+
+        .modal,
+        .form-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+
+        }
+
+        .modal-content,
+        .form-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        #categoryFilter {
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1> PRODUCTS </h1>
+    </header>
+    <div class="container">
+        <div class="controls">
+            <select id="categoryFilter">
+                <option value="all">All Categories</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Books">Books</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Search..." />
+            <button class="btn-add" onclick="openAddModal()">Add Product</button>
+            <button class="btn-delete" onclick="deleteSelected()">Delete Selected</button>
+            <button class="btn-select"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"> Select
+                All</button>
+        </div>
+
+        <div id="productGrid" class="product-grid"></div>
+    
+
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <span onclick="closeProductModal()" style="cursor:pointer; float:right;">&times;</span>
+            <img id="modalImage" src="" alt="Product" />
+            <h2 id="modalName"></h2>
+            <p id="modalPrice"></p>
+            <p id="modalDescription"></p>
+        </div>
+    </div>
+
+    <div class="form-modal" id="formModal">
+        <div class="form-content">
+            <h2 id="formTitle">Add Product</h2>
+            <input type="text" id="formName" placeholder="Name" />
+            <input type="text" id="formCategory" placeholder="Category" />
+            <input type="number" id="formPrice" placeholder="Price" />
+            <input type="text" id="formImage" placeholder="Image Filename" />
+            <textarea id="formDesc" placeholder="Description"></textarea>
+            <button onclick="saveProduct()">Save</button>
+            <button onclick="closeFormModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        const productGrid = document.getElementById("productGrid");
+        const categoryFilter = document.getElementById("categoryFilter");
+        const searchInput = document.getElementById("searchInput");
+        const selectAllCheckbox = document.getElementById("selectAll");
+        let products = [];
+        let editingId = null;
+
+        fetch("products.json")
+            .then(res => res.json())
+            .then(data => {
+                products = data;
+                renderProducts();
+            });
+
+        function renderProducts() {
+            const filter = categoryFilter.value.toLowerCase();
+            const search = searchInput.value.toLowerCase();
+            productGrid.innerHTML = "";
+
+            products.forEach(product => {
+                const matchCategory = filter === "all" || product.category.toLowerCase() === filter;
+                const matchSearch = product.name.toLowerCase().includes(search);
+                if (matchCategory && matchSearch) {
+                    const card = document.createElement("div");
+                    card.className = "product";
+                    card.innerHTML = `
+         <input type = "checkbox" data-id="${product.id}" class="select-checkbox">
+            <img src="${product.image}" alt="${product.name}" onclick='openProductModal(${JSON.stringify(product)})' />
+            <h3>${product.name}</h3>
+            <p>₹${product.price}</p>
+            <div class="actions">
+              <button onclick='editProduct(${JSON.stringify(product)})'>Edit</button>
+              <button class='delete' onclick='deleteProduct(${product.id})'>Delete</button>
+            </div>
+          `;
+                    productGrid.appendChild(card);
+                }
+            });
+        }
+
+        function openAddModal() {
+            editingId = null;
+            document.getElementById("formTitle").textContent = "Add Product";
+            document.getElementById("formName").value = "";
+            document.getElementById("formCategory").value = "";
+            document.getElementById("formPrice").value = "";
+            document.getElementById("formImage").value = "";
+            document.getElementById("formDesc").value = "";
+            document.getElementById("formModal").style.display = "flex";
+        }
+
+        function editProduct(product) {
+            editingId = product.id;
+            document.getElementById("formTitle").textContent = "Edit Product";
+            document.getElementById("formName").value = product.name;
+            document.getElementById("formCategory").value = product.category;
+            document.getElementById("formPrice").value = product.price;
+            document.getElementById("formImage").value = product.image;
+            document.getElementById("formDesc").value = product.description;
+            document.getElementById("formModal").style.display = "flex";
+        }
+
+        function closeFormModal() {
+            document.getElementById("formModal").style.display = "none";
+        }
+
+        function saveProduct() {
+            const name = document.getElementById("formName").value;
+            const category = document.getElementById("formCategory").value;
+            const price = parseFloat(document.getElementById("formPrice").value);
+            const image = document.getElementById("formImage").value.trim();
+            const description = document.getElementById("formDesc").value;
+            if (!name || !category || !price || !image || !description) return alert("Please fill all fields");
+
+            if (editingId) {
+                const index = products.findIndex(p => p.id === editingId);
+                products[index] = { id: editingId, name, category, price, image, description };
+            } else {
+                const id = products.length ? products[products.length - 1].id + 1 : 1;
+                products.push({ id, name, category, price, image, description });
+            }
+
+            closeFormModal();
+            renderProducts();
+        }
+
+        function deleteProduct(id) {
+            products = products.filter(p => p.id !== id);
+            renderProducts();
+        }
+
+        function deleteSelected() {
+            const checkboxes = document.querySelectorAll(".select-checkbox:checked");
+            if (!checkboxes.length) {
+                alert("No products selected.");
+                return;
+            }
+
+            for (let i = 0; i < checkboxes.length; i++) {
+                const id = +checkboxes[i].dataset.id;
+                products = products.filter(p => p.id !== id);
+            }
+
+            renderProducts();
+        }
+
+        function toggleSelectAll(checkbox) {
+            const allCheckboxes = document.querySelectorAll(".select-checkbox");
+            allCheckboxes.forEach(cb => cb.checked = checkbox.checked);
+        }
+
+        function openProductModal(product) {
+            document.getElementById("modalImage").src = product.image;
+            document.getElementById("modalName").textContent = product.name;
+            document.getElementById("modalPrice").textContent = "$" + product.price;
+            document.getElementById("modalDescription").textContent = product.description;
+            document.getElementById("productModal").style.display = "flex";
+        }
+
+        function closeProductModal() {
+            document.getElementById("productModal").style.display = "none";
+        }
+
+
+        document.getElementById("productModal").addEventListener("click", function (e) {
+            if (e.target === this) {
+                closeProductModal();
+            }
+        });
+
+        categoryFilter.addEventListener("change", renderProducts);
+        searchInput.addEventListener("input", renderProducts);
+    </script>
+</body>
+</html>

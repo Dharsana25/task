@@ -1,0 +1,83 @@
+[
+    {
+        "id": 1,
+        "name": "Iphone",
+        "category": "Electronics",
+        "price": 50000,
+        "description": "High-end Iphone",
+        "image": "mob.jpeg"
+    },
+    {
+        "id": 2,
+        "name": "Laptop",
+        "category": "Electronics",
+        "price": 80000,
+        "description": "Powerful laptop",
+        "image": "lap.jpeg"
+    },
+    {
+        "id": 3,
+        "name": "Headphones",
+        "category": "Electronics",
+        "price": 800,
+        "description": "Noise cancelling headphones",
+        "image": "blu.jpeg"
+    },
+    {
+        "id": 4,
+        "name": "T-Shirt",
+        "category": "Fashion",
+        "price": 250,
+        "description": "Comfortable cotton T-shirt",
+        "image": "th.jpeg"
+    },
+    {
+        "id": 5,
+        "name": "Sneakers",
+        "category": "Fashion",
+        "price": 400,
+        "description": "Stylish sneakers",
+        "image": "s.jpeg"
+    },
+    {
+        "id": 6,
+        "name": "Shirt",
+        "category": "Fashion",
+        "price": 300,
+        "description": "Stylish shirt",
+        "image": "sh.jpeg"
+    },
+   
+    {
+        "id": 9,
+        "name": "perfume",
+        "category": "Fashion",
+        "price": 100,
+        "description": "perfume",
+        "image": "perfume.jpeg"
+    },
+    {
+        "id": 10,
+        "name": "JavaScript Book",
+        "category": "Books",
+        "price": 450,
+        "description": "Learn JavaScript",
+        "image": "js.jpeg"
+    },
+    {
+        "id": 11,
+        "name": "HTML & CSS",
+        "category": "Books",
+        "price": 400,
+        "description": "Master in HTML & CSS",
+        "image": "h.jpeg"
+    },
+    {
+        "id": 12,
+        "name": "Java Book",
+        "category": "Books",
+        "price": 500,
+        "description": "Learn java",
+        "image": "ja.jpeg"
+    }
+]
