@@ -5,7 +5,7 @@
         "category": "Electronics",
         "price": 50000,
         "description": "High-end Iphone",
-        "image": "mob.jpeg"
+        "image": "mobile.jpeg"
     },
     {
         "id": 2,
@@ -21,7 +21,7 @@
         "category": "Electronics",
         "price": 800,
         "description": "Noise cancelling headphones",
-        "image": "blu.jpeg"
+        "image": "headphone.jpeg"
     },
     {
         "id": 4,
@@ -29,7 +29,7 @@
         "category": "Fashion",
         "price": 250,
         "description": "Comfortable cotton T-shirt",
-        "image": "th.jpeg"
+        "image": "Tshirt.jpeg"
     },
     {
         "id": 5,
@@ -37,7 +37,7 @@
         "category": "Fashion",
         "price": 400,
         "description": "Stylish sneakers",
-        "image": "s.jpeg"
+        "image": "snekers.jpeg"
     },
     {
         "id": 6,
@@ -45,7 +45,7 @@
         "category": "Fashion",
         "price": 300,
         "description": "Stylish shirt",
-        "image": "sh.jpeg"
+        "image": "shirt.jpeg"
     },
     {
         "id": 9,
@@ -69,7 +69,7 @@
         "category": "Books",
         "price": 400,
         "description": "Master in HTML & CSS",
-        "image": "h.jpeg"
+        "image": "html,css.jpeg"
     },
     {
         "id": 12,
@@ -77,6 +77,6 @@
         "category": "Books",
         "price": 500,
         "description": "Learn java",
-        "image": "ja.jpeg"
+        "image": "java.jpeg"
     }
 ]
